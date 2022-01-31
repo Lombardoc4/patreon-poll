@@ -1,0 +1,9 @@
+{
+    "author": "Crickey Cris",
+    "name": "patreon-poll",
+    "version": "1.0.0",
+    "dependencies": {
+        "bcryptjs": "^2.4.3",
+        "mongodb": "latest"
+    }
+}

@@ -1,19 +1,5 @@
-.App {
-  text-align: center;
-}
 
-.App-logo {
-  height: 40vmin;
-  pointer-events: none;
-}
-
-@media (prefers-reduced-motion: no-preference) {
-  .App-logo {
-    animation: App-logo-spin infinite 20s linear;
-  }
-}
-
-.App-header {
+main {
   background-color: #282c34;
   min-height: 100vh;
   display: flex;
@@ -24,15 +10,106 @@
   color: white;
 }
 
-.App-link {
-  color: #61dafb;
+input[type=text], input[type=password] {
+  font-size: unset;
+  margin: 0.5em 0;
+  border: none;
+  outline: none;
 }
 
-@keyframes App-logo-spin {
-  from {
-    transform: rotate(0deg);
-  }
-  to {
-    transform: rotate(360deg);
-  }
+
+#poll input[type=text] {
+  padding-left: 1em;
+}
+
+#admin input[type=text], #admin input[type=password] {
+  border-bottom: 1px solid grey;
+  margin: 0.75em 0;
+}
+
+input[type=checkbox]{
+  transform: scale(2);
+}
+
+label{
+  padding-left: 1em;
+}
+
+
+h1{
+  text-align: center;
+}
+
+.endDate{
+  font-size: 16px;
+  padding-bottom: 1em;
+}
+
+.panel{
+  color: black;
+  background-color: white;
+  border-radius: 2.5em;
+  padding: 1.5em;
+  min-width: 50%;
+  max-width: 75%;
+}
+
+#admin .panel{
+  min-width: auto;
+}
+
+.optionsGrid{
+  display: grid;
+  /* margin: 0 0 1em; */
+  gap: 1em;
+  grid-auto-rows: 1fr;
+}
+
+div[data-target]{
+  margin-top: 1em;
+}
+
+.optionButton{
+  display: flex;
+  align-items: center;
+  padding: 0.25em 1em;
+  border: 1px solid grey;
+  border-radius: 2.5em;
+}
+
+.pollButtonGroup{
+  display: flex;
+}
+
+.button{
+  font-size:unset;
+  padding: 1em;
+  border-radius: 2.5em;
+  background-color: lightblue;
+  outline: none;
+  border: none;
+}
+
+
+
+#admin .button{
+  padding: 0.5em;
+}
+
+#pollOptions{
+  color: #000;
+}
+
+.addPollOption {
+  border-bottom: 1px solid grey;
+  margin: 0.75em 0;
+  display: flex;
+  align-items: center;
+  width: 100%;
+}
+
+#admin .addPollOption input{
+  margin: 0;
+  border-bottom: none;
+
 }

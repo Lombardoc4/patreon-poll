@@ -122,7 +122,7 @@ const PollOptions = ({dates, options}) => {
                     <h1>Will Ramos Cover Poll</h1>
                     { poll.options &&
                         <>
-                            <p className='endDate'>
+                            <p className='pollEndDate'>
                             Survey Ends: {new Date(poll.end_date).toLocaleDateString('en-us', { weekday: "long", year: "numeric", month: 'short', day: "numeric"})}
                             </p>
                             <div className="panel">
@@ -143,7 +143,7 @@ const PollOptions = ({dates, options}) => {
                                     }
                                 { view === 'options' &&
                                     <div id="pollOptions">
-                                        <div className='optionsGrid' style={{gridTemplateColumns: `repeat(${Math.round(optionValues.length / 4) + 1}, 1fr)` }}>
+                                        <div className='optionsGrid'>
                                         {optionValues.map(o => (
                                             <Option key={o} click={selectOption} active={o === selected ? true : false} value={o}>
                                                 <label>{o}</label>

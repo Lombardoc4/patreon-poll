@@ -12,7 +12,7 @@ main {
 
 input[type=text], input[type=password] {
   font-size: unset;
-  margin: 0.5em 0;
+  /* margin: 0.5em 0; */
   border: none;
   outline: none;
 }
@@ -40,7 +40,7 @@ h1{
   text-align: center;
 }
 
-.endDate{
+.pollEndDate{
   font-size: 16px;
   padding-bottom: 1em;
 }
@@ -61,6 +61,7 @@ h1{
 .optionsGrid{
   display: grid;
   /* margin: 0 0 1em; */
+  grid-template-columns: repeat(2, 1fr);
   gap: 1em;
   grid-auto-rows: 1fr;
 }
@@ -72,7 +73,7 @@ div[data-target]{
 .optionButton{
   display: flex;
   align-items: center;
-  padding: 0.25em 1em;
+  padding: 0.5em 1em;
   border: 1px solid grey;
   border-radius: 2.5em;
 }
@@ -83,18 +84,34 @@ div[data-target]{
 
 .button{
   font-size:unset;
-  padding: 1em;
+  padding: 0.5em 1em;
   border-radius: 2.5em;
   background-color: lightblue;
   outline: none;
   border: none;
+  cursor: pointer;
 }
-
-
 
 #admin .button{
   padding: 0.5em;
 }
+
+#admin .button.liveButton{
+  padding: 0 1em;
+  display: block;
+  color: unset;
+  text-decoration: none;
+  text-align: center;
+  /* font-size: 14px; */
+
+}
+
+#admin .button.removeButton{
+  background-color: red;
+  width: 100%;
+  margin: 0.5em 0 0;
+}
+
 
 #pollOptions{
   color: #000;
@@ -112,4 +129,35 @@ div[data-target]{
   margin: 0;
   border-bottom: none;
 
+}
+
+.dateGroup{
+  display: flex;
+}
+
+.startDate{
+  margin-right: 1em;
+}
+
+.endDate{
+  margin-left: 1em;
+}
+
+@media screen and (max-width: 576px) {
+  input[type=checkbox]{
+    transform: scale(1.5);
+  }
+
+  .panel{
+    width: 100%;
+    max-width: unset;
+  }
+
+  .dateGroup{
+    display: block;
+  }
+
+  .endDate, .startDate{
+    margin: 0;
+  }
 }

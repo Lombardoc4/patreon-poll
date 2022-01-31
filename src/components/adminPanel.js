@@ -91,7 +91,7 @@ const AdminPanel = () => {
 
 
     const handleLogin = (login) => {
-
+        console.log('login')
         if (!login) {
             setLogin(false);
             clearPollData();
@@ -115,22 +115,28 @@ const AdminPanel = () => {
                     code: code
                 }),
             })
+            console.log('res', res);
             return await res.json();
         }
+
+        console.log('login');
         loginPost().then((data) => {
+            console.log('data', data);
             if (data.user) {
                 setLogin(true);
                 let cookieExpire = new Date();
                 cookieExpire.setTime(cookieExpire.getTime() + 86400000); // 86400000 milli in 24 hours
                 document.cookie = `_user=${data._id}; expires=${cookieExpire.toUTCString()}`;
-            }
-            else {
-                setLoginErr(data.err);
+            } else {
+                console.log(data);
+                setLoginErr(data.error);
             }
         })
 
 
     }
+
+    // console.log(loginErr);
 
     const submitPoll = (e) => {
         e.preventDefault();
@@ -167,15 +173,16 @@ const AdminPanel = () => {
     return (
         <main id="admin">
 
-            <div className="panel" style={{minWidth: loggedIn && '50%'}}>
+            <div className="panel" style={{minWidth: loggedIn && '66%'}}>
                 { !loggedIn &&
                     <>
                         <h1>Patreon Polls</h1>
-                        <form onSubmit={(e) => {e.preventDefault(); handleLogin(true)}}>
+                        <form onSubmit={(e) => {console.log('test'); e.preventDefault(); handleLogin(true)}}>
                             <div style={{display: 'flex', flexDirection: 'column'}}>
+                                {(loginErr && loginErr.includes('User')) && <p style={{fontSize: '12px', marginBottom: '-1em', color: 'red'}}>{loginErr}</p>}
                                 <input id="user" ref={userRef} placeholder="Username" type='text'/>
+                                {(loginErr && loginErr.includes('Password')) && <p style={{fontSize: '12px', marginBottom: '-1em', color: 'red'}}>{loginErr}</p>}
                                 <input id="code" ref={codeRef} placeholder="Password" type='password'/>
-                                {loginErr && <p style={{fontSize: '12px'}}>{loginErr}</p>}
                             </div>
                             <button type='submit' style={{width: '100%'}} className="button">Login</button>
                         </form>
@@ -207,19 +214,15 @@ const AdminPanel = () => {
 
                             {/* All Polls */}
                             { !pollData  &&
-                                <div className="optionsGrid"  style={{gridTemplateColumns: `repeat(2, 1fr)` }}>
+                                <div className="optionsGrid">
                                     {polls && polls.map(p => (
-                                        <div onClick={() => setPollData(p)} key={p.title} style={{cursor: 'pointer', padding: '1em', border: '1px solid lightgrey', borderRadius: '1em', }}>
-                                            <div style={{display: 'flex', justifyContent: 'space-between'}}>
-                                                <p>{p.title}</p>
-                                                <p>{Object.values(p.options).reduce((sum, v) => v ? sum + v : sum, 0)} votes</p>
-                                            </div>
-                                            <div style={{display: 'flex', justifyContent: 'space-between'}}>
-                                                <div>
-                                                    <p>Starts: {new Date(p.start_date).toDateString()}</p>
-                                                    <p>Ends: {new Date(p.end_date).toDateString()}</p>
-                                                </div>
-                                                <a href={`localhost:3000/${p._id}`} target='_blank' rel="noreferrer">Survey Link</a>
+                                        <div onClick={() => setPollData(p)} key={p.title} style={{display: 'flex', flexDirection: 'column', cursor: 'pointer', padding: '0.75em', border: '1px solid lightgrey', borderRadius: '1em', }}>
+                                            <p style={{marginBottom: '0.25em'}}>{p.title}</p>
+                                            <p style={{fontSize: '12px', marginBottom: '0.5em'}}>Starts: <b>{new Date(p.start_date).toDateString()}</b></p>
+                                            <p style={{fontSize: '12px', marginBottom: '1em'}}>Ends: <b>{new Date(p.end_date).toDateString()}</b></p>
+                                            <div style={{marginTop: 'auto'}}>
+                                                <a className="button liveButton" onClick={(e) => e.stopPropagation()} href={`http://patreon-poll.s3-website-us-east-1.amazonaws.com/${p._id}`} target='_blank' rel="noreferrer">Live Poll</a>
+                                                {/* <button className="button liveButton removeButton">Remove Poll</button> */}
                                             </div>
                                         </div>
                                     ))}
@@ -230,12 +233,12 @@ const AdminPanel = () => {
                             { (pollData && !pollData._id) &&
                                 <form style={{display: 'flex', flexDirection: 'column'}} onSubmit={(e) => {submitPoll(e)}}>
                                     <input onChange={(e) => setPollData({...pollData, title: e.target.value})} style={{fontSize: '1.5em', margin: '0'}} id="user" placeholder="Title" type='text'/>
-                                    <div style={{display: 'flex',  margin: '1em 0 0'}}>
-                                        <div style={{width: '50%', marginRight: '0.5em'}}>
+                                    <div className="dateGroup" style={{ margin: '1em 0 0'}}>
+                                        <div className="startDate" style={{width: '50%'}}>
                                             <label htmlFor="start_date">Start Date</label><br/>
                                             <input id="start_date" onChange={(e) => setPollData({...pollData, start_date: e.target.value})} type="datetime-local" />
                                         </div>
-                                        <div style={{width: '50%', marginLeft: '0.5em'}}>
+                                        <div className="endDate" style={{width: '50%'}}>
                                             <label htmlFor="end_date">End Date</label><br/>
                                             <input id="end_date" onChange={(e) => setPollData({...pollData, end_date: e.target.value})} type="datetime-local" />
                                         </div>

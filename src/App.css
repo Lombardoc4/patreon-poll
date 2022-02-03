@@ -1,13 +1,13 @@
 
 main {
-  background-color: #282c34;
+  /* background-color: #282c34; */
   min-height: 100vh;
   display: flex;
   flex-direction: column;
   align-items: center;
   justify-content: center;
   font-size: calc(10px + 2vmin);
-  color: white;
+  /* color: white; */
 }
 
 input[type=text], input[type=password] {
@@ -42,13 +42,16 @@ h1{
 
 .pollEndDate{
   font-size: 16px;
-  padding-bottom: 1em;
+  text-align: center;
+  padding-top: 1em;
 }
 
 .panel{
-  color: black;
-  background-color: white;
-  border-radius: 2.5em;
+  /* color: black; */
+  background-color: rgba(255, 255, 255, 0.5);
+  border-radius: 1em;
+  border: 1px solid grey;
+  margin: 1.5em;
   padding: 1.5em;
   min-width: 50%;
   max-width: 75%;
@@ -62,6 +65,14 @@ h1{
   display: grid;
   /* margin: 0 0 1em; */
   grid-template-columns: repeat(2, 1fr);
+  gap: 1em;
+  grid-auto-rows: 1fr;
+}
+
+.surveyGrid{
+  display: grid;
+  /* margin: 0 0 1em; */
+  grid-template-columns: repeat(1, 1fr);
   gap: 1em;
   grid-auto-rows: 1fr;
 }
@@ -98,6 +109,9 @@ div[data-target]{
 
 #admin .button.liveButton{
   padding: 0 1em;
+  font-size: 16px;
+  width: 100%;
+  margin: 0.5em 0;
   display: block;
   color: unset;
   text-decoration: none;
@@ -107,7 +121,7 @@ div[data-target]{
 }
 
 #admin .button.removeButton{
-  background-color: red;
+  background-color: #ff3333;
   width: 100%;
   margin: 0.5em 0 0;
 }

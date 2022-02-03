@@ -27,7 +27,7 @@ const PollOptions = ({options, pollData, setPollData}) => {
     return options.map((o, i) => (
 
         <div className="addPollOption" key={'option' + i}>
-            <input id="user"
+            <input
             onChange={(e) => {
                 addPollOption(e, i)
             }}
@@ -91,7 +91,7 @@ const AdminPanel = () => {
 
 
     const handleLogin = (login) => {
-        console.log('login')
+        // console.log('login')
         if (!login) {
             setLogin(false);
             clearPollData();
@@ -119,16 +119,16 @@ const AdminPanel = () => {
             return await res.json();
         }
 
-        console.log('login');
+        // console.log('login');
         loginPost().then((data) => {
-            console.log('data', data);
+            // console.log('data', data);
             if (data.user) {
                 setLogin(true);
                 let cookieExpire = new Date();
                 cookieExpire.setTime(cookieExpire.getTime() + 86400000); // 86400000 milli in 24 hours
                 document.cookie = `_user=${data._id}; expires=${cookieExpire.toUTCString()}`;
             } else {
-                console.log(data);
+                // console.log(data);
                 setLoginErr(data.error);
             }
         })
@@ -141,7 +141,7 @@ const AdminPanel = () => {
     const submitPoll = (e) => {
         e.preventDefault();
         if (! pollData.title || !pollData.start_date || !pollData.end_date || pollData.options.length < 2){
-            console.log('incomplete')
+            // console.log('incomplete')
             return;
         }
 
@@ -149,7 +149,9 @@ const AdminPanel = () => {
         pollData.options.map(o => parsedOptions[o] = 0);
 
         pollData.options = parsedOptions;
+        pollData.active = true;
 
+        // console.log('submitData', pollData)
         // Post Data
         const addPoll = async () => {
             const res =  await fetch("https://eguwmve5gb.execute-api.us-east-1.amazonaws.com/default/patreonAddPoll", {
@@ -168,6 +170,7 @@ const AdminPanel = () => {
 
         // Return to surveys and refetch polls
     }
+
 
 
     return (
@@ -214,15 +217,30 @@ const AdminPanel = () => {
 
                             {/* All Polls */}
                             { !pollData  &&
-                                <div className="optionsGrid">
+                                <div className="surveyGrid">
                                     {polls && polls.map(p => (
-                                        <div onClick={() => setPollData(p)} key={p.title} style={{display: 'flex', flexDirection: 'column', cursor: 'pointer', padding: '0.75em', border: '1px solid lightgrey', borderRadius: '1em', }}>
-                                            <p style={{marginBottom: '0.25em'}}>{p.title}</p>
-                                            <p style={{fontSize: '12px', marginBottom: '0.5em'}}>Starts: <b>{new Date(p.start_date).toDateString()}</b></p>
-                                            <p style={{fontSize: '12px', marginBottom: '1em'}}>Ends: <b>{new Date(p.end_date).toDateString()}</b></p>
-                                            <div style={{marginTop: 'auto'}}>
+                                        <div onClick={() => setPollData(p)} key={p.title} style={{display: 'flex', cursor: 'pointer', padding: '0.75em', border: '1px solid lightgrey', borderRadius: '1em', }}>
+                                            <div style={{width: '33%', display: 'flex', flexDirection: 'column'}}>
+                                                <p style={{marginBottom: '0.25em'}}>{p.title}</p>
+                                            {/* <p style={{fontSize: '12px', marginBottom: '0.5em'}}>Starts: <b>{new Date(p.start_date).toDateString()}</b></p> */}
+                                                <p style={{fontSize: '12px', color: !p.active ? "red" : "green"}}>{!p.active ? "Inactive" : "Active"}</p>
+                                                <p style={{fontSize: '12px'}}>Ends: <b>{new Date(p.end_date).toDateString()}</b></p>
+                                            </div>
+                                            <div style={{margin: '0 auto'}}>
+                                            {Object.values(p.options).reduce((sum, v) => sum + v, 0)} Votes
+                                            </div>
+                                            <div style={{marginLeft: 'auto'}}>
+                                                <button className="button liveButton" onClick={() => setPollData(p)}>Results</button>
                                                 <a className="button liveButton" onClick={(e) => e.stopPropagation()} href={`http://patreon-poll.s3-website-us-east-1.amazonaws.com/${p._id}`} target='_blank' rel="noreferrer">Live Poll</a>
-                                                {/* <button className="button liveButton removeButton">Remove Poll</button> */}
+                                                <button className="button liveButton">More Options</button>
+                                                {/* <select onClick={(e) => e.stopPropagation()} name="cars" id="cars"> */}
+                                                    {/* <option value="">More Options</option> */}
+                                                    {/* <option value="stop">Stop Survey</option> */}
+                                                    {/* <option value="live">Live Poll</option> */}
+                                                    {/* <option value="saab">Saab</option> */}
+                                                    {/* <option value="mercedes">Mercedes</option> */}
+                                                    {/* <option value="audi">Audi</option> */}
+                                                {/* </select> */}
                                             </div>
                                         </div>
                                     ))}
@@ -232,7 +250,8 @@ const AdminPanel = () => {
                             {/* Add Survey Form */}
                             { (pollData && !pollData._id) &&
                                 <form style={{display: 'flex', flexDirection: 'column'}} onSubmit={(e) => {submitPoll(e)}}>
-                                    <input onChange={(e) => setPollData({...pollData, title: e.target.value})} style={{fontSize: '1.5em', margin: '0'}} id="user" placeholder="Title" type='text'/>
+                                    <input onChange={(e) => setPollData({...pollData, title: e.target.value})} style={{fontSize: '1.5em', margin: '0'}} placeholder="Title" type='text'/>
+                                    <input onChange={(e) => setPollData({...pollData, description: e.target.value})} placeholder="Description" type='text'/>
                                     <div className="dateGroup" style={{ margin: '1em 0 0'}}>
                                         <div className="startDate" style={{width: '50%'}}>
                                             <label htmlFor="start_date">Start Date</label><br/>
@@ -243,6 +262,7 @@ const AdminPanel = () => {
                                             <input id="end_date" onChange={(e) => setPollData({...pollData, end_date: e.target.value})} type="datetime-local" />
                                         </div>
                                     </div>
+                                    <input type="file" accept="image/jpg" placeholder="Background Image"/>
                                     <div style={{ margin: '1em 0 0', maxHeight: '300px', overflow: 'scroll'}} >
 
                                         <PollOptions options={pollData.options} pollData={pollData} setPollData={setPollData}/>
@@ -256,12 +276,20 @@ const AdminPanel = () => {
                                             <img height="50px" width="50px" style={{width: '1em', height: '1em', cursor: 'pointer'}} src="close.svg" alt="+"/>
                                         </div> */}
                                     </div>
+
                                     <p onClick={() => setPollData({...pollData, options: [...pollData.options, '']})} style={{color: 'grey', cursor: 'pointer', display: 'flex', alignItems: 'center'}}>
                                         <img height="50px" width="50px" style={{width: '1em', height: '1em'}} src="add.svg" alt="+"/>
                                             Add Option
                                     </p>
-                                        {/* <button style={{ width: '33%', margin: 'auto 0 auto 1em'}} className="button">Add Option</button> */}
-
+                                    <div style={{ margin: '1em 0 0'}} >
+                                        <p>Redirect users after survey is complete </p>
+                                        <input id="returnURL"
+                                            onChange={(e) => setPollData({...pollData, returnURL: e.target.value}) }
+                                            placeholder={`Return URL`}
+                                            style={{width: '100%'}}
+                                            type='url'
+                                            />
+                                    </div>
                                     <button style={{ width: '100%', margin: '1em 0 0'}} type="submit" className="button">Submit</button>
                                 </form>
 

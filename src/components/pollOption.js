@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import { useParams } from "react-router-dom";
 import ResultsPanel from "./resultsPanel";
+import RedirectTimer from "./redirectTimer"
 import PollButtons from "./pollButtons";
 
 const Option = ({ click, active, children, ...rest}) => {
@@ -19,6 +20,8 @@ const PollOptions = ({dates, options}) => {
     const [view, setView] = useState('options');
     const [selected, changeSelected] = useState(false);
     const [submitted, setSubmitted] = useState(false);
+    const [surveyFinished, setSurveyFinished] = useState(false);
+    const [loading, setLoading] = useState(true);
     let params = useParams();
 
     let optionValues = {};
@@ -35,8 +38,6 @@ const PollOptions = ({dates, options}) => {
 
     useEffect(() => {
         // Get Poll Data
-
-
         const getPolls = async () => {
             const res =  await fetch("https://eguwmve5gb.execute-api.us-east-1.amazonaws.com/default/patreonGetPoll", {
                 method:  'POST',
@@ -45,6 +46,11 @@ const PollOptions = ({dates, options}) => {
             return await res.json();
         }
         getPolls().then((data) => {
+            setLoading(false);
+            if (new Date(data.end_date).getTime() < new Date().getTime() ) {
+                setSurveyFinished(true);
+            }
+
             setPoll(data);
         })
 
@@ -62,10 +68,14 @@ const PollOptions = ({dates, options}) => {
                 end: new Date(poll.end_date).getTime()
             }
 
+            console.log('submit', submitTime)
+            console.log('parsed', parseDates)
+
             if (submitTime > parseDates.start && submitTime < parseDates.end) {
                 changeSelected(windowValue.slice(spacerIndex + 1));
                 setSubmitted(true);
             } else {
+                console.log('remove local storage');
                 window.localStorage.removeItem('survey');
             }
         }
@@ -76,24 +86,24 @@ const PollOptions = ({dates, options}) => {
     }
 
 
-
     const handleSubmit = async () => {
         if (!selected) {
             return;
         }
 
-
         const data = {
             id: poll._id,
-            selected: "options." + selected
+            selected: "options." + selected,
         }
 
-        console.log(data);
+        // Increment poll client side
+        const incOption = {[selected]: poll.options[selected] + 1}
+        setPoll({...poll,  incOption})
 
-        // const res = fetch("https://eguwmve5gb.execute-api.us-east-1.amazonaws.com/default/patreonSubmitPoll", {
-        //     method:  'POST',
-        //     body:    JSON.stringify(data),
-        // })
+        const res = fetch("https://eguwmve5gb.execute-api.us-east-1.amazonaws.com/default/patreonSubmitPoll", {
+            method:  'POST',
+            body:    JSON.stringify(data),
+        })
 
         window.localStorage.setItem('survey', Date.now() + '-' + selected);
         setView(view === 'options' ? 'results' : 'options')
@@ -107,61 +117,76 @@ const PollOptions = ({dates, options}) => {
         selectOption(value);
     }
 
-
+    console.log(poll);
 
 
     return (
         <main id="poll">
-            { !poll.options ?
+            { loading  ?
                 <div>
-                    <h1>404</h1>
-                    <p>No Poll Here</p>
+                    <h1>Loading</h1>
                 </div>
+            :
+                <>
+                { poll._id && surveyFinished ?
+                    <>
+                        <div style={{textAlign: 'center'}}>
+                            Survey Finished on:<br/>
+                            <b>{new Date(poll.end_date).toLocaleDateString('en-us', { weekday: "long", year: "numeric", month: 'short', day: "numeric"})}</b>
+                        </div>
+                        <div className="panel">
+                            <ResultsPanel optionValues={optionValues} optionVotes={optionVotes} totalVotes={totalVotes}/>
+                        </div>
+                    </>
                 :
                 <>
-                    <h1>Will Ramos Cover Poll</h1>
-                    { poll.options &&
-                        <>
-                            <p className='pollEndDate'>
-                            Survey Ends: {new Date(poll.end_date).toLocaleDateString('en-us', { weekday: "long", year: "numeric", month: 'short', day: "numeric"})}
-                            </p>
-                            <div className="panel">
-                                { view === 'results' &&
-                                    <ResultsPanel optionValues={optionValues} optionVotes={optionVotes} totalVotes={totalVotes}/>
-                                    // <div id="results" style={{width: '100%'}}>
-                                    //     {optionVotes.map((o, i) => (
+                { !poll.options ?
+                    <div>
+                        <h1>404</h1>
+                        <p>No Poll Here</p>
+                    </div>
+                    :
+                    <>
+                        { poll.options &&
+                            <>
+                                <h1>{poll.description}</h1>
+                                <p className='pollEndDate'>
+                                    Survey Ends: {new Date(poll.end_date).toLocaleDateString('en-us', { weekday: "long", year: "numeric", month: 'short', day: "numeric"})}
+                                    <br/>
+                                    { view !== 'results' && <>Return to <a href={poll.returnURL}>{poll.returnURL}</a></>}
+                                </p>
+                                <div className="panel">
+                                            { view === 'results' &&
+                                                <>
+                                                    <ResultsPanel optionValues={optionValues} optionVotes={optionVotes} totalVotes={totalVotes}/>
+                                                    <RedirectTimer url={poll.returnURL}/>
+                                                </>
+                                            }
+                                            { view === 'options' &&
+                                                <div id="pollOptions">
+                                                    <div className='optionsGrid'>
+                                                    {optionValues.map(o => (
+                                                        <Option key={o} click={selectOption} active={o === selected ? true : false} value={o}>
+                                                            <label>{o}</label>
+                                                        </Option>
+                                                    ))}
+                                                    </div >
+                                                        <Option target='customOption' style={{marginTop: '1em'}} click={customOptionClick} active={(selected && !optionValues.includes(selected)) ? true : false}>
+                                                            {/* <label style={{paddingLeft: '1em'}}>{o}</label> */}
+                                                            <input data-target='customOption' id="customOption" onChange={(e) => selectOption(e.target.value)} type="text" placeholder="Your Choice"/>
+                                                        </Option>
+                                                </div>
+                                            }
 
-                                        //         <div key={optionValues[i]} style={{width: '100%', display: 'flex', alignItems: 'center', padding: '0.25em'}}>
-                                        //             <p style={{width: '25%', fontSize: '14px', textAlign: 'end', padding: '0 1em'}}> {optionValues[i]}</p>
-                                        //             <div style={{width: '75%',  display: 'flex', alignItems: 'center',}}>
-                                        //                     <div style={{backgroundColor: 'red', width: `${Math.floor((o / totalVotes) * 100)}%`, borderRadius: '1em'}} >&nbsp;</div>
-                                        //                     <b style={{padding: '0 0.5em'}} >{Math.floor((o / totalVotes) * 100)}%</b>
-                                        //             </div>
-                                        //         </div>
-                                        //     ))}
-                                        // </div>
-                                    }
-                                { view === 'options' &&
-                                    <div id="pollOptions">
-                                        <div className='optionsGrid'>
-                                        {optionValues.map(o => (
-                                            <Option key={o} click={selectOption} active={o === selected ? true : false} value={o}>
-                                                <label>{o}</label>
-                                            </Option>
-                                        ))}
-                                        </div >
-                                            <Option target='customOption' style={{marginTop: '1em'}} click={customOptionClick} active={(selected && !optionValues.includes(selected)) ? true : false}>
-                                                {/* <label style={{paddingLeft: '1em'}}>{o}</label> */}
-                                                <input data-target='customOption' id="customOption" onChange={(e) => selectOption(e.target.value)} type="text" placeholder="Your Choice"/>
-                                            </Option>
-                                    </div>
+                                            <PollButtons submitted={submitted} setView={setView} view={view} handleSubmit={handleSubmit}/>
+
+                                        </div>
+                                    </>
                                 }
-
-                                <PollButtons submitted={submitted} setView={setView} view={view} handleSubmit={handleSubmit}/>
-
-                            </div>
-                        </>
-                    }
+                            </>
+                        }
+                    </>
+                }
                 </>
             }
             </main>

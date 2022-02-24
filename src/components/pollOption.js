@@ -20,7 +20,7 @@ const PollOptions = ({dates, options}) => {
     const [view, setView] = useState('options');
     const [selected, changeSelected] = useState(false);
     const [submitted, setSubmitted] = useState(false);
-    const [surveyFinished, setSurveyFinished] = useState(false);
+    const [active, setActive] = useState(false);
     const [loading, setLoading] = useState(true);
     let params = useParams();
 
@@ -30,7 +30,6 @@ const PollOptions = ({dates, options}) => {
 
 
     if (poll?.options) {
-        // console.log('options', poll.options);
         optionValues = Object.keys(poll.options);
         optionVotes = Object.values(poll.options);
         totalVotes = optionVotes.reduce((sum, v) => sum + v, 0);
@@ -48,7 +47,12 @@ const PollOptions = ({dates, options}) => {
         getPolls().then((data) => {
             setLoading(false);
             if (new Date(data.end_date).getTime() < new Date().getTime() ) {
-                setSurveyFinished(true);
+                setActive({desc: 'finished', date: data.end_date});
+            }
+
+
+            if (new Date(data.start_date).getTime() > new Date().getTime() ) {
+                setActive({desc: 'starts', date: data.start_date});
             }
 
             setPoll(data);
@@ -57,6 +61,7 @@ const PollOptions = ({dates, options}) => {
 
     // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [])
+
 
     useEffect(() => {
         const windowValue = window.localStorage.getItem('survey');
@@ -128,13 +133,13 @@ const PollOptions = ({dates, options}) => {
                 </div>
             :
                 <>
-                { poll._id && surveyFinished ?
+                { poll._id && active ?
                     <>
                         <div style={{textAlign: 'center'}}>
-                            Survey Finished on:<br/>
-                            <b>{new Date(poll.end_date).toLocaleDateString('en-us', { weekday: "long", year: "numeric", month: 'short', day: "numeric"})}</b>
+                            Survey {active.desc} on:<br/>
+                            <b>{new Date(active.date).toLocaleDateString('en-us', { weekday: "long", year: "numeric", month: 'short', day: "numeric"})}</b>
                         </div>
-                        <div className="panel">
+                        <div className="panel px-10 py-8">
                             <ResultsPanel optionValues={optionValues} optionVotes={optionVotes} totalVotes={totalVotes}/>
                         </div>
                     </>
@@ -155,7 +160,7 @@ const PollOptions = ({dates, options}) => {
                                     <br/>
                                     { view !== 'results' && <>Return to <a href={poll.returnURL}>{poll.returnURL}</a></>}
                                 </p>
-                                <div className="panel">
+                                <div className="panel px-10 py-8">
                                             { view === 'results' &&
                                                 <>
                                                     <ResultsPanel optionValues={optionValues} optionVotes={optionVotes} totalVotes={totalVotes}/>

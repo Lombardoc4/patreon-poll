@@ -6,6 +6,8 @@ import Login from './Login'
 import SurveyList from "./SurveyList";
 import ShareModal from "./Share";
 import { Link } from "react-router-dom";
+import { AddSurvey } from "./AddSurvey";
+import { Results } from "./Result";
 
 
 const PollResults = ({poll}) => {
@@ -53,9 +55,11 @@ const AdminPanel = ({login, error}) => {
     const [loggedIn, setLogin] = login;
     const [loginErr, setLoginErr] = error;
     const [polls, setPolls] = useState([]);
-    const [pollData, setPollData] = useState(false);
+    const [addPollData, setPollData] = useState(false);
     const [shareModal, toggleShareModal] = useState(false);
     const [filters, toggleFilters] = useState(false);
+    const [subSection, setSubSection] = useState(false);
+    const [addSurvey, toggleAdd] = useState(false);
     const filterOptions = ['Upcoming', 'Ongoing', 'Completed']
 
     const getPolls = () => {
@@ -64,38 +68,11 @@ const AdminPanel = ({login, error}) => {
                   "$oid": "61f302c763d8c2ab4c6ceec6"
                 },
                 "title": "First Survey",
-
-                "end_date": "Wednesday, Feb 16, 2022",
+                "end_date": "Saturday, Feb 26, 2022",
                 "start_date": "Friday, Feb 11, 2022",
                 "options": {
-                  "Track Tip1": 5,
-                  "Dusti's Desires": 19
-                },
-                "user": 'TheWillRamos'
-            },{
-                "_id": {
-                  "$oid": "61f302c763d9c2ab4c6ceec6"
-                },
-                "title": "Second Survey",
-
-                "end_date": "Wednesday, Mar 2, 2022",
-                "start_date": "Friday, Feb 11, 2022",
-                "options": {
-                  "Track Tip1": 5,
-                  "Dusti's Desires": 19
-                },
-                "user": 'TheWillRamos'
-            },{
-                "_id": {
-                  "$oid": "61f302c763d9c2ab4c6ceec5"
-                },
-                "title": "Thirds Survey",
-
-                "end_date": "Wednesday, Mar 2, 2022",
-                "start_date": "Friday, Feb 25, 2022",
-                "options": {
-                  "Track Tip1": 5,
-                  "Dusti's Desires": 19
+                    "Track Tip1": 5,
+                    "Dusti's Desires": 19
                 },
                 "user": 'TheWillRamos'
             }])
@@ -177,20 +154,20 @@ const AdminPanel = ({login, error}) => {
 
     const submitPoll = (e) => {
         e.preventDefault();
-        if (! pollData.title || !pollData.start_date || !pollData.end_date || pollData.options.length < 2){
+        if (! addPollData.title || !addPollData.start_date || !addPollData.end_date || addPollData.options.length < 2){
             return;
         }
 
         const parsedOptions = {};
-        pollData.options.map(o => parsedOptions[o] = 0);
-        pollData.options = parsedOptions;
-        pollData.active = true;
+        addPollData.options.map(o => parsedOptions[o] = 0);
+        addPollData.options = parsedOptions;
+        addPollData.active = true;
 
         // Post Data
         const addPoll = async () => {
             const res =  await fetch("https://eguwmve5gb.execute-api.us-east-1.amazonaws.com/default/patreonAddPoll", {
                 method:  'POST',
-                body:    JSON.stringify(pollData),
+                body:    JSON.stringify(addPollData),
             })
             return await res.json();
         }
@@ -203,11 +180,20 @@ const AdminPanel = ({login, error}) => {
 
     }
 
-    const shareClick = (data) => {
-        toggleShareModal(data)
-    }
+
 
     // console.log(polls);
+    if (subSection.section === 'add') {
+        return (
+            <AddSurvey pollData={subSection}  toggleAdd={setSubSection}/>
+        )
+    }
+
+    if (subSection.section === 'results') {
+        return (
+            <Results pollData={subSection}  toggleResults={setSubSection}/>
+        )
+    }
 
     return (
         <main id="admin"
@@ -223,7 +209,7 @@ const AdminPanel = ({login, error}) => {
                 }
                 { loggedIn &&
                 <>
-                {shareModal && <ShareModal openState={[shareModal, toggleShareModal]} data={shareModal}></ShareModal>}
+                {subSection.section === 'share' && <ShareModal openState={[subSection.section === 'share', setSubSection]} data={subSection}></ShareModal>}
                 <div className=" border-b border-black shadow-dark w-full">
                     <div className="container">
                         <div className="flex items-center">
@@ -252,7 +238,7 @@ const AdminPanel = ({login, error}) => {
                 </div>
                 <div className="container">
 
-                    {polls && <SurveyList polls={polls} shareClick={shareClick} filter={filters}/>}
+                    {polls && <SurveyList polls={polls} toggleSub={setSubSection} filter={filters}/>}
                 </div>
                 {/* <div onClick={() => {console.log('click'); toggleFilters(!filters)}} className={"fixed right-0 top-0 h-full d-flex bg-white/50 " + (filters ? 'w-full' : 'w-0')}>
                     <div onClick={e => e.stopPropagation()} className=" h-full ml-auto w-2/3 bg-secondary container">
@@ -260,127 +246,11 @@ const AdminPanel = ({login, error}) => {
 
                     </div>
                 </div> */}
-                <Link to="/add" state={{admin: loggedIn}} className="fixed bottom-4 right-4">
+                <Link to="/add" state={{admin: loggedIn}} className="fixed bottom-4 right-4 rounded-full">
                     <CircleButton classList="bg-success">
                         <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24"><line x1="2" y1="12" x2="22" y2="12" fill="none" stroke="#fff" strokeLinecap="round" strokeMiterlimit="10" strokeWidth="4"/><line x1="12" y1="22" x2="12" y2="2" fill="none" stroke="#fff" strokeLinecap="round" strokeMiterlimit="10" strokeWidth="4"/></svg>
                     </CircleButton>
                 </Link>
-
-
-
-                {/* Old stuff */}
-            <div className="panel shadow-lg" style={{minWidth: (loggedIn && '66%'), maxWidth: '275px'}}>
-                    <>
-                            {/* Header Buttons */}
-                            <div style={{display: 'flex', marginBottom: '1em '}}>
-                                {   pollData ?
-                                    <button onClick={() => clearPollData()} style={{width: '66%', marginRight: '1em'}} className="button">Back</button>
-                                    :
-                                    <button onClick={(e) => {
-                                        setPollData({
-                                            title: '',
-                                            start_date: '',
-                                            end_date: '',
-                                            options: ['', '']
-                                        });
-                                        e.target.blur();
-                                    }}
-                                    style={{width: '66%', marginRight: '1em'}}
-                                    className="button">
-                                        Add Poll
-                                    </button>
-                                }
-                            </div>
-
-                            {/* All Polls */}
-                            { !pollData  &&
-                                <div className="surveyGrid">
-                                    {polls && polls.map(p => (
-                                        <div className="surveyBox" onDoubleClick={(e) => {if (e.target.className === 'surveyBox') {setPollData(p)}}} key={p.title} style={{display: 'flex', cursor: 'pointer', padding: '0.75em', border: '1px solid lightgrey', borderRadius: '1em', }}>
-                                            <div style={{width: '33%', display: 'flex', flexDirection: 'column'}}>
-                                                <p style={{marginBottom: '0.25em'}}>{p.title}</p>
-                                            {/* <p style={{fontSize: '12px', marginBottom: '0.5em'}}>Starts: <b>{new Date(p.start_date).toDateString()}</b></p> */}
-                                                <p style={{fontSize: '12px', color: !p.active ? "red" : "green"}}>{!p.active ? "Inactive" : "Active"}</p>
-                                                <p style={{fontSize: '12px'}}>Ends: <b>{new Date(p.end_date).toDateString()}</b></p>
-                                            </div>
-                                            <div style={{margin: '0 auto'}}>
-                                            {Object.values(p.options).reduce((sum, v) => sum + v, 0)} Votes
-                                            </div>
-                                            <div style={{marginLeft: 'auto'}}>
-                                                <button className="button liveButton" onClick={() => setPollData(p)}>Results</button>
-                                                <a className="button liveButton" onClick={(e) => e.stopPropagation()} href={`http://patreon-poll.s3-website-us-east-1.amazonaws.com/${p._id}`} target='_blank' rel="noreferrer">Live Poll</a>
-                                                {/* <button className="button liveButton">More Options</button> */}
-                                                <SurveyOptionsDD copy="More Options" options={["Stop Survey", "Remove Survey"]}/>
-                                                {/* <select onClick={(e) => e.stopPropagation()} name="cars" id="cars"> */}
-                                                    {/* <option value="">More Options</option> */}
-                                                    {/* <option value="stop">Stop Survey</option> */}
-                                                    {/* <option value="live">Live Poll</option> */}
-                                                    {/* <option value="saab">Saab</option> */}
-                                                    {/* <option value="mercedes">Mercedes</option> */}
-                                                    {/* <option value="audi">Audi</option> */}
-                                                {/* </select> */}
-                                            </div>
-                                        </div>
-                                    ))}
-                                </div>
-                            }
-
-                            {/* Add Survey Form */}
-                            { (pollData && !pollData._id) &&
-                                <form style={{display: 'flex', flexDirection: 'column'}} onSubmit={(e) => {submitPoll(e)}}>
-                                    <input onChange={(e) => setPollData({...pollData, title: e.target.value})} style={{fontSize: '1.5em', margin: '0'}} placeholder="Title" type='text'/>
-                                    <input onChange={(e) => setPollData({...pollData, description: e.target.value})} placeholder="Description" type='text'/>
-                                    <div className="dateGroup" style={{ margin: '1em 0 0'}}>
-                                        <div className="startDate" style={{width: '50%'}}>
-                                            <label htmlFor="start_date">Start Date</label><br/>
-                                            <input id="start_date" onChange={(e) => setPollData({...pollData, start_date: e.target.value})} type="datetime-local" />
-                                        </div>
-                                        <div className="endDate" style={{width: '50%'}}>
-                                            <label htmlFor="end_date">End Date</label><br/>
-                                            <input id="end_date" onChange={(e) => setPollData({...pollData, end_date: e.target.value})} type="datetime-local" />
-                                        </div>
-                                    </div>
-                                    <input type="file" accept="image/jpg" placeholder="Background Image"/>
-                                    <div style={{ margin: '1em 0 0', maxHeight: '300px', overflow: 'scroll'}} >
-
-                                        <PollOptions options={pollData.options} pollData={pollData} setPollData={setPollData}/>
-
-                                        {/* <div>
-                                            <input id="user" placeholder="Option 1" type='text'/>
-                                            <img height="50px" width="50px" style={{width: '1em', height: '1em'}} src="close.svg" alt="+"/>
-                                        </div>
-                                        <div>
-                                            <input  id="user" placeholder="Option 2" type='text'/>
-                                            <img height="50px" width="50px" style={{width: '1em', height: '1em', cursor: 'pointer'}} src="close.svg" alt="+"/>
-                                        </div> */}
-                                    </div>
-
-                                    <p onClick={() => setPollData({...pollData, options: [...pollData.options, '']})} style={{color: 'grey', cursor: 'pointer', display: 'flex', alignItems: 'center'}}>
-                                        <img height="50px" width="50px" style={{width: '1em', height: '1em'}} src="add.svg" alt="+"/>
-                                            Add Option
-                                    </p>
-                                    <div style={{ margin: '1em 0 0'}} >
-                                        <p>Redirect users after survey is complete </p>
-                                        <input id="returnURL"
-                                            onChange={(e) => setPollData({...pollData, returnURL: e.target.value}) }
-                                            placeholder={`Return URL`}
-                                            style={{width: '100%'}}
-                                            type='url'
-                                            />
-                                    </div>
-                                    <button style={{ width: '100%', margin: '1em 0 0'}} type="submit" className="button">Submit</button>
-                                </form>
-
-                            }
-
-                        <>
-                            {/* Poll Results */}
-                            { (pollData && pollData._id) &&
-                                <PollResults poll={pollData}/>
-                            }
-                        </>
-                    </>
-            </div>
             </>
                 }
         </main>

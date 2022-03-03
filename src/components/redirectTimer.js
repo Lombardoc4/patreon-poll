@@ -1,11 +1,11 @@
 import { useState, useEffect } from "react";
+import  {CircleButton} from "./Button";
 
 let timeout;
 
 const RedirectTimer = ({url}) => {
     const [startTime, setStartTime] = useState(false);
     const [timer, setTimer] = useState(30);
-    // let currTime = new Date().getTime();
 
     useEffect(() => {
         setStartTime(new Date().getTime())
@@ -25,21 +25,25 @@ const RedirectTimer = ({url}) => {
         }
     }, [startTime])
 
-    if (startTime) {
+    const clearRedirect = () => {
+        clearInterval(timeout);
+        setStartTime(false);
+        setTimer(0);
+    }
 
-        return (
-            <div style={{display: 'flex', alignItems: 'center'}}>
-                <div style={{width: '25%'}}>
-                    <button onClick={() => {clearInterval(timeout)}} style={{width: '100%'}} className="button">Stop</button>
-                </div>
-                <div style={{width: '75%', margin: '1em'}}>
+
+    return (
+        <>
+            {startTime &&
+            <>
+                <div className="w-full mb-2 font-bold">
                     Redirecting to <a href={url}>{url}</a> in&nbsp;<b>{timer}&nbsp;seconds</b>
                 </div>
-            </div>
-        )
-    } else {
-        return <></>
-    }
+                 <CircleButton onClick={() => clearRedirect()} classList="bg-danger text-white">Stop</CircleButton>
+            </>
+            }
+        </>
+    )
 
 };
 

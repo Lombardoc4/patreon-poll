@@ -1,11 +1,23 @@
-
 main {
-  /* background-color: #282c34; */
-  /* height: 100vh; */
+  min-height: 100vh;
   display: flex;
-  flex-direction: column;
   align-items: center;
+  flex-direction: column;
+
+}
+
+#pollMain {
+  background-color: #282c34;
+  background-image: url(https://crislombardo.com/img/the-cave.png);
+  background-position: center;
+  background-attachment: fixed;
+  background-size: contain;
+  padding: 1.25em;
+  padding-bottom: 5em;
   justify-content: center;
+
+  /* flex-direction: column; */
+
   /* font-size: calc(10px + 2vmin); */
   /* color: white; */
 }
@@ -39,8 +51,12 @@ input[type=checkbox]{
   transform: scale(2);
 }
 
+label, .pollOption{
+  overflow-wrap: anywhere;
+}
+
 label{
-  padding-left: 1em;
+  padding-left: 1rem;
 }
 
 
@@ -70,13 +86,8 @@ h1{
   /* max-width: 75%; */
 }
 
-#admin .panel{
-  /* min-width: auto; */
-}
-
 .optionsGrid{
   display: grid;
-  /* margin: 0 0 1em; */
   grid-template-columns: repeat(2, 1fr);
   gap: 1em;
   grid-auto-rows: 1fr;
@@ -90,17 +101,17 @@ h1{
   grid-auto-rows: 1fr;
 }
 
-div[data-target]{
+/* div[data-target]{
   margin-top: 1em;
-}
+} */
 
-.optionButton{
+/* .optionButton{
   display: flex;
   align-items: center;
   padding: 0.5em 1em;
   border: 1px solid grey;
   border-radius: 2.5em;
-}
+} */
 
 .pollButtonGroup{
   display: flex;
@@ -171,8 +182,8 @@ div[data-target]{
 }
 
 @media screen and (max-width: 576px) {
-  input[type=checkbox]{
-    transform: scale(1.5);
+  input[type=radio]{
+    transform: scale(1.25);
   }
 
   .panel{

@@ -105,12 +105,39 @@ export function OptionsInput({ register, id, validError, ...rest }) {
                 type={rest.type || 'text'}
                 defaultValue={rest.value}
                 placeholder={id}
-                className={"w-full mr-4 text-2xl border-b-2 outline-none rounded-none focus:border-black autofill:bg-none " + rest?.classList}
+                className={"w-full text-2xl border-b-2 outline-none rounded-none focus:border-black autofill:bg-none " + rest?.classList}
                 {...register(id.replace("'", ''), rest?.validate)}
                 />
                 <Button onClick={() => rest.removeOption(rest.index)} classList="bg-danger rounded-full d-flex items-center p-2" padding={true}>
                     <svg xmlns="http://www.w3.org/2000/svg" width="16.67" height="16.67" viewBox="0 0 16.67 16.67"><line x1="2" y1="14.67" x2="14.67" y2="2" fill="none" stroke="#fff" strokeLinecap="round" strokeMiterlimit="10" strokeWidth="4"/><line x1="2" y1="2" x2="14.67" y2="14.67" fill="none" stroke="#fff" strokeLinecap="round" strokeMiterlimit="10" strokeWidth="4"/></svg>
                 </Button>
+            </div>
+        </>
+    )
+}
+
+export function PassInput({ register, id, validError, ...rest }) {
+    const [inputText, toggleText] = useState(false);
+    return (
+        <>
+            <p className="mt-4 text-xs leading-none text-danger">
+                {validError ? validError.message : '\xa0'}
+            </p>
+            <div className="flex align-middle w-full relative">
+                <input
+                type={inputText ? 'text' : 'password'}
+                defaultValue={rest.value}
+                placeholder={id.charAt(0).toUpperCase() + id.slice(1)}
+                className={"w-full text-2xl pr-10 border-b-2 outline-none rounded-none focus:border-black autofill:bg-none " + rest?.classList}
+                {...register(id.replace("'", ''), rest?.validate)}
+                />
+
+                {/* <Button  classList="bg-transparent d-flex items-center p-2" padding={true}> */}
+                <svg className="absolute right-2 top-1/2 -translate-y-1/2" onClick={() => toggleText(!inputText)} xmlns="http://www.w3.org/2000/svg" width="25" height="15" viewBox="0 0 25 15">
+                    <ellipse cx="12.5" cy="7.5" rx="12" ry="7" fill="#c5d3ff" stroke="#000" strokeMiterlimit="10"/>
+                    {inputText && <circle cx="12.5" cy="7.5" r="3" fill="#07378f"/>}
+                </svg>
+                {/* </Button> */}
             </div>
         </>
     )
